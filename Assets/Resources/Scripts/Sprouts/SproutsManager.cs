@@ -84,6 +84,7 @@ public class SproutsManager : MonoBehaviour
         }
     }
 
+    // Check if dots occur in same region and are in diff boundaries
     private bool TwoBoundaryViable(Dot dot1, Dot dot2)
     {
 
@@ -107,31 +108,33 @@ public class SproutsManager : MonoBehaviour
 
     public void TwoBoundaryMove()
     {
+        // Get dots from selection
         Dot dot1 = selectedDots[0];
         Dot dot2 = selectedDots[1];
 
+        // Find reference to common region and dot boundaries.
         Region moveRegion = dot1.availableRegions.FindAll(x => dot2.availableRegions.Contains(x))[0];
         Boundary bound1 = dot1.availableBoundaries.Find(x => x.refRegion == moveRegion);
         Boundary bound2 = dot2.availableBoundaries.Find(x => x.refRegion == moveRegion);
 
 
-
-        Boundary newBoundary = new Boundary(moveRegion, bound1, bound2);
+        
+        Boundary newBoundary = new Boundary(moveRegion, bound1, bound2); // Generate new boundary on common region
         boundaries.Add(newBoundary);
 
-        Dot newDot = new Dot((dots.Count+1).ToString(), 2, moveRegion, newBoundary);
+        Dot newDot = new Dot((dots.Count+1).ToString(), 2, moveRegion, newBoundary); // Generate new dot
         dots.Add(newDot);
 
-        Tuple<string, string> newSeg1 = new Tuple<string,string>(dot1.ID, newDot.ID);
+        Tuple<string, string> newSeg1 = new Tuple<string,string>(dot1.ID, newDot.ID); // Add new segment added from new dot
         newBoundary.AddSegment(newSeg1);
 
-        Tuple<string, string> newSeg2 = new Tuple<String, String>(dot2.ID, newDot.ID);
+        Tuple<string, string> newSeg2 = new Tuple<String, String>(dot2.ID, newDot.ID); // Add new segment added from new dot
         newBoundary.AddSegment(newSeg2);
 
-        dot1.SetRefBoundary(newBoundary);
+        dot1.SetRefBoundary(newBoundary); // Change OG dot refBoundaries
         dot2.SetRefBoundary(newBoundary);
 
-        boundaries.Remove(bound1);
+        boundaries.Remove(bound1); // Remove old boundaries
         boundaries.Remove(bound2);
 
         PrintGameState();
