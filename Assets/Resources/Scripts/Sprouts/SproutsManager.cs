@@ -63,6 +63,7 @@ public class SproutsManager : MonoBehaviour
 
     public void SelectDots()
     {
+        selectedDots.Clear();
         selectedDots.Add(dots.Find(x => x.ID == dot1ID));
         selectedDots.Add(dots.Find(x => x.ID == dot2ID));
 
