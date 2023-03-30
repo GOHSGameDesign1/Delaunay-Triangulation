@@ -23,6 +23,8 @@ public class SproutsManager : MonoBehaviour
     public string dot1ID;
     public string dot2ID;
 
+    private List<Dot> selectedDots = new List<Dot>();
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -31,7 +33,7 @@ public class SproutsManager : MonoBehaviour
 
     private void Start()
     {
-        FindTwoBoundaryMove();
+        SelectDots();
     }
 
     // Update is called once per frame
@@ -59,26 +61,25 @@ public class SproutsManager : MonoBehaviour
         PrintGameState();
     }
 
-    public void FindTwoBoundaryMove()
+    public void SelectDots()
     {
-        Dot dot1 = dots.Find(x => x.ID == dot1ID);
-        Dot dot2 = dots.Find(x => x.ID == dot2ID);
+        selectedDots.Add(dots.Find(x => x.ID == dot1ID));
+        selectedDots.Add(dots.Find(x => x.ID == dot2ID));
 
-        if (dot1 == null)
+        if (selectedDots[0] == null)
         {
             Debug.LogError("Dot1 could not be found!");
             return;
         }
-        if (dot2 == null)
+        if (selectedDots[1] == null)
         {
             Debug.LogError("Dot2 could not be found!");
             return;
         }
 
-        if (TwoBoundaryViable(dot1, dot2))
+        if (TwoBoundaryViable(selectedDots[0], selectedDots[1]))
         {
-            Debug.Log("Two boundary move available between " + dot1.ID + " and " + dot2.ID);
-            TwoBoundaryMove(dot1, dot2);
+            Debug.Log("Two boundary move available between " + selectedDots[0].ID + " and " + selectedDots[1].ID);
         }
     }
 
@@ -103,8 +104,11 @@ public class SproutsManager : MonoBehaviour
         return true;
     }
 
-    private void TwoBoundaryMove(Dot dot1, Dot dot2)
+    public void TwoBoundaryMove()
     {
+        Dot dot1 = selectedDots[0];
+        Dot dot2 = selectedDots[1];
+
         Region moveRegion = dot1.availableRegions.FindAll(x => dot2.availableRegions.Contains(x))[0];
         Boundary bound1 = dot1.availableBoundaries.Find(x => x.refRegion == moveRegion);
         Boundary bound2 = dot2.availableBoundaries.Find(x => x.refRegion == moveRegion);
