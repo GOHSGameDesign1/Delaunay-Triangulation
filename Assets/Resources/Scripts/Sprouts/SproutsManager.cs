@@ -43,7 +43,7 @@ public class SproutsManager : MonoBehaviour
     private void SetupGame()
     {
 
-        Region startRegion = new Region(boundaries);
+        Region startRegion = new Region();
 
         regions.Add(startRegion);
 
@@ -55,8 +55,6 @@ public class SproutsManager : MonoBehaviour
             Dot newDot = new Dot((i + 1).ToString(), 0, regions[0], boundaries[i]);
             dots.Add(newDot);
         }
-
-        startRegion.SetBoundaries(boundaries);
 
         PrintGameState();
     }
@@ -108,14 +106,13 @@ public class SproutsManager : MonoBehaviour
     private void TwoBoundaryMove(Dot dot1, Dot dot2)
     {
         Region moveRegion = dot1.availableRegions.FindAll(x => dot2.availableRegions.Contains(x))[0];
-        Boundary bound1 = dot1.availableBoundaries.FindAll(x => moveRegion.boundaries.Contains(x))[0];
-        Boundary bound2 = dot2.availableBoundaries.FindAll(x => moveRegion.boundaries.Contains(x))[0];
+        Boundary bound1 = dot1.availableBoundaries.Find(x => x.refRegion == moveRegion);
+        Boundary bound2 = dot2.availableBoundaries.Find(x => x.refRegion == moveRegion);
 
 
 
         Boundary newBoundary = new Boundary(moveRegion, bound1, bound2);
         boundaries.Add(newBoundary);
-        moveRegion.boundaries.Add(newBoundary);
 
         Dot newDot = new Dot((dots.Count+1).ToString(), 2, moveRegion, newBoundary);
         dots.Add(newDot);
@@ -131,8 +128,6 @@ public class SproutsManager : MonoBehaviour
 
         boundaries.Remove(bound1);
         boundaries.Remove(bound2);
-        moveRegion.boundaries.Remove(bound1);
-        moveRegion.boundaries.Remove(bound2);
 
         PrintGameState();
     }
@@ -145,9 +140,10 @@ public class SproutsManager : MonoBehaviour
 
         for(int i = 0; i < regions.Count; i++)
         {
-            for(int j = 0; j < regions[i].boundaries.Count; j++)
+            List<Boundary> currentRegionBoundaries = boundaries.FindAll(x => x.refRegion == regions[i]);
+            for (int j = 0; j < boundaries.Count; j++)
             {
-                string segmentString = String.Join(" ,", regions[i].boundaries[j].segments);
+                string segmentString = String.Join(" ,", currentRegionBoundaries[j].segments);
                 Debug.Log("Region " + i + " segments:" + segmentString);
             }
         }
