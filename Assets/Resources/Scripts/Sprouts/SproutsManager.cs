@@ -20,8 +20,7 @@ public class SproutsManager : MonoBehaviour
     [SerializeField]
     private List<Region> regions = new List<Region>();
 
-    public string dot1ID;
-    public string dot2ID;
+    public List<string> selectedDotIDs = new List<string>();
 
     private List<Dot> selectedDots = new List<Dot>();
 
@@ -33,7 +32,7 @@ public class SproutsManager : MonoBehaviour
 
     private void Start()
     {
-        SelectDots();
+
     }
 
     // Update is called once per frame
@@ -58,14 +57,26 @@ public class SproutsManager : MonoBehaviour
             dots.Add(newDot);
         }
 
-        PrintGameState();
+        //PrintGameState();
     }
 
     public void SelectDots()
     {
+        PrintGameState();
+
         selectedDots.Clear();
-        selectedDots.Add(dots.Find(x => x.ID == dot1ID));
-        selectedDots.Add(dots.Find(x => x.ID == dot2ID));
+
+        foreach(string ID in selectedDotIDs)
+        {
+            Dot selectedDot = dots.Find(x => x.ID == ID);
+            if (selectedDot == null) 
+            {
+                Debug.LogWarning("Dot with ID: " + ID + " could not be found!");
+            }
+
+            selectedDots.Add(selectedDot);
+
+        }
 
         if (selectedDots[0] == null)
         {
@@ -108,9 +119,22 @@ public class SproutsManager : MonoBehaviour
 
     public void TwoBoundaryMove()
     {
+
+        if(selectedDots.Count != 2)
+        {
+            Debug.LogWarning("Need only 2 dots selected for 2 boundary move");
+            return;
+        }
+
         // Get dots from selection
         Dot dot1 = selectedDots[0];
         Dot dot2 = selectedDots[1];
+
+        if(!TwoBoundaryViable(dot1 , dot2 ))
+        {
+            Debug.Log("Cannot make a two boundary move with these points!");
+            return;
+        }
 
         // Find reference to common region and dot boundaries.
         Region moveRegion = dot1.availableRegions.FindAll(x => dot2.availableRegions.Contains(x))[0];
@@ -149,11 +173,13 @@ public class SproutsManager : MonoBehaviour
         for(int i = 0; i < regions.Count; i++)
         {
             List<Boundary> currentRegionBoundaries = boundaries.FindAll(x => x.refRegion == regions[i]);
+            string segmentString = "";
             for (int j = 0; j < boundaries.Count; j++)
             {
-                string segmentString = String.Join(" ,", currentRegionBoundaries[j].segments);
-                Debug.Log("Region " + i + " segments:" + segmentString);
+                segmentString += String.Join(" ,", currentRegionBoundaries[j].segments);
             }
+
+            Debug.Log("Region " + i + " segments:" + segmentString);
         }
     }
 }
