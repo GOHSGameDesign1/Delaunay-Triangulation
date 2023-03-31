@@ -78,21 +78,8 @@ public class SproutsManager : MonoBehaviour
 
         }
 
-        if (selectedDots[0] == null)
-        {
-            Debug.LogError("Dot1 could not be found!");
-            return;
-        }
-        if (selectedDots[1] == null)
-        {
-            Debug.LogError("Dot2 could not be found!");
-            return;
-        }
+        Debug.Log("Dots selected");
 
-        if (TwoBoundaryViable(selectedDots[0], selectedDots[1]))
-        {
-            Debug.Log("Two boundary move available between " + selectedDots[0].ID + " and " + selectedDots[1].ID);
-        }
     }
 
     // Check if dots occur in same region and are in diff boundaries
