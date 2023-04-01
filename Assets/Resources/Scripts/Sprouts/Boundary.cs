@@ -9,6 +9,8 @@ public class Boundary
     public Region refRegion { get; }
     public List<Tuple<string, string>> segments { get; } = new List<Tuple<string, string>>();
 
+    public int boundaryType { get; private set; } = 0; // The type of the boundary, whether it is interior, exterior, or neither.
+
     // Make a starting boundary from 1 dot. There are no segments in starting boundaries.
     /*public Boundary(Dot singleDot) 
     { 
@@ -55,5 +57,15 @@ public class Boundary
     public void AddSegment(Tuple<string,string> newSegment)
     {
         segments.Add(newSegment);
+    }
+
+    /* Sets the type of the boundary. Interior/Exterior are for boundaries created by one region moves.
+     * 0 = neither
+     * 1 = exterior
+     * 2 = interior
+    */
+    public void SetType(int type)
+    {
+        boundaryType = type;
     }
 }

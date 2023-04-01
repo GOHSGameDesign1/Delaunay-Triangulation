@@ -11,14 +11,13 @@ public class SproutsManager : MonoBehaviour
     [SerializeField]
     private int startingDots;
 
-    [SerializeField]
-    private List<Dot> dots = new List<Dot>();
+    [SerializeField] public static List<Dot> dots { get; private set; } = new List<Dot>();
 
     [SerializeField]
-    private List<Boundary> boundaries = new List<Boundary>();
+    public static List<Boundary> boundaries { get; } = new List<Boundary>();
 
     [SerializeField]
-    private List<Region> regions = new List<Region>();
+    public static List<Region> regions { get; } = new List<Region>();
 
     public List<string> selectedDotIDs = new List<string>();
 
@@ -149,6 +148,63 @@ public class SproutsManager : MonoBehaviour
         boundaries.Remove(bound2);
 
         PrintGameState();
+    }
+
+    public void OneBoundaryTypeDecider()
+    {
+        if (selectedDots.Count == 0) 
+        { 
+            Debug.LogWarning("Not enough selected dots!"); 
+            return; 
+        }
+
+
+
+        if(selectedDots.Count == 1)
+        {
+            if (selectedDots[0].numOfLines <= 1)
+            {
+
+            }
+        }
+
+        List<Region> sharedRegions = FindSharedRegions(selectedDots);
+
+        Debug.Log(sharedRegions.Count);
+
+        // Checking for self-looping move
+        if (selectedDots[0].numOfLines <= 1)
+        {
+            if(selectedDots.Count == 1)
+            {
+
+            }
+        }
+    }
+
+    private List<Region> FindSharedRegions(List<Dot> dots)
+    {
+        List<List<Region>> regionLists = new List<List<Region>>();
+
+        foreach (Dot dot in dots)
+        {
+            regionLists.Add(dot.availableRegions);
+        }
+
+        List<Region> sharedRegions = new List<Region>();
+
+        foreach(Region compareRegion in regionLists[0])
+        {
+            foreach(List<Region> compareList in regionLists)
+            {
+                if (!compareList.Contains(compareRegion))
+                {
+                    break;
+                }
+                sharedRegions.Add(compareRegion);
+            }
+        }
+        return sharedRegions;
     }
 
     private void PrintGameState()
