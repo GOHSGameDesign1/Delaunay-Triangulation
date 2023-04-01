@@ -31,7 +31,7 @@ public class SproutsManager : MonoBehaviour
 
     private void Start()
     {
-
+        //SetupGame();
     }
 
     // Update is called once per frame
@@ -42,6 +42,10 @@ public class SproutsManager : MonoBehaviour
 
     private void SetupGame()
     {
+        regions.Clear();
+        boundaries.Clear();
+        dots.Clear();
+        selectedDots.Clear();
 
         Region startRegion = new Region();
 
@@ -56,14 +60,20 @@ public class SproutsManager : MonoBehaviour
             dots.Add(newDot);
         }
 
+        Debug.Log("dot count: " + dots.Count);
+
         //PrintGameState();
     }
 
     public void SelectDots()
     {
-        PrintGameState();
-
         selectedDots.Clear();
+
+        if(selectedDotIDs.Count == 0)
+        {
+            Debug.LogWarning("Not enough selected dots!");
+            return;
+        }
 
         foreach(string ID in selectedDotIDs)
         {
@@ -71,13 +81,29 @@ public class SproutsManager : MonoBehaviour
             if (selectedDot == null) 
             {
                 Debug.LogWarning("Dot with ID: " + ID + " could not be found!");
+                continue;
             }
 
             selectedDots.Add(selectedDot);
 
         }
 
+        if (selectedDots.Count == 0)
+        {
+            Debug.LogWarning("Not enough selected dots!");
+            selectedDots.Clear();
+            return;
+        }
+
+        if (!SproutsHelper.CheckAllSameRegion(selectedDots))
+        {
+            Debug.LogWarning("Selected Dots must all share at least 1 region");
+            selectedDots.Clear();
+            return;
+        }
+
         Debug.Log("Dots selected");
+        PrintGameState();
 
     }
 
@@ -152,59 +178,7 @@ public class SproutsManager : MonoBehaviour
 
     public void OneBoundaryTypeDecider()
     {
-        if (selectedDots.Count == 0) 
-        { 
-            Debug.LogWarning("Not enough selected dots!"); 
-            return; 
-        }
-
-
-
-        if(selectedDots.Count == 1)
-        {
-            if (selectedDots[0].numOfLines <= 1)
-            {
-
-            }
-        }
-
-        List<Region> sharedRegions = FindSharedRegions(selectedDots);
-
-        Debug.Log(sharedRegions.Count);
-
-        // Checking for self-looping move
-        if (selectedDots[0].numOfLines <= 1)
-        {
-            if(selectedDots.Count == 1)
-            {
-
-            }
-        }
-    }
-
-    private List<Region> FindSharedRegions(List<Dot> dots)
-    {
-        List<List<Region>> regionLists = new List<List<Region>>();
-
-        foreach (Dot dot in dots)
-        {
-            regionLists.Add(dot.availableRegions);
-        }
-
-        List<Region> sharedRegions = new List<Region>();
-
-        foreach(Region compareRegion in regionLists[0])
-        {
-            foreach(List<Region> compareList in regionLists)
-            {
-                if (!compareList.Contains(compareRegion))
-                {
-                    break;
-                }
-                sharedRegions.Add(compareRegion);
-            }
-        }
-        return sharedRegions;
+        
     }
 
     private void PrintGameState()
@@ -216,13 +190,26 @@ public class SproutsManager : MonoBehaviour
         for(int i = 0; i < regions.Count; i++)
         {
             List<Boundary> currentRegionBoundaries = boundaries.FindAll(x => x.refRegion == regions[i]);
-            string segmentString = "";
-            for (int j = 0; j < boundaries.Count; j++)
+            List<string> boundaryList = new List<string>();
+            for (int j = 0; j < currentRegionBoundaries.Count; j++)
             {
-                segmentString += String.Join(" ,", currentRegionBoundaries[j].segments);
+                Boundary currentBoundary = currentRegionBoundaries[j];
+                string segmentString = "";
+                string singlesString = "";
+
+                if (currentBoundary.segments.Count == 0)
+                {
+                    Dot boundaryDot = SproutsHelper.GetDotsOfSameBoundary(currentRegionBoundaries[j]).First();
+                    singlesString = boundaryDot.ID;
+                    boundaryList.Add(singlesString);
+                    continue;
+                }
+                segmentString += String.Join(" ,", currentBoundary.segments);
+                boundaryList.Add(segmentString);
+
             }
 
-            Debug.Log("Region " + i + " segments:" + segmentString);
+            Debug.Log("Region " + i + " Boundaries:" + String.Join(" ,", boundaryList));
         }
     }
 }

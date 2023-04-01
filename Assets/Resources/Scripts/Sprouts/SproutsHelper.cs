@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class SproutsHelper
 {
-    public static bool CheckSameRegion(List<Dot> dots)
+    public static bool CheckAllSameRegion(List<Dot> dots)
     {
         if(dots == null || dots.Count == 0) return false;
 
@@ -19,7 +19,7 @@ public static class SproutsHelper
         return true;
     }
 
-    public static bool CheckSameBoundary(List<Dot> dots)
+    public static bool CheckAllSameBoundary(List<Dot> dots)
     {
         if (dots == null || dots.Count == 0) return false;
 
@@ -31,6 +31,29 @@ public static class SproutsHelper
         }
 
         return true;
+    }
+
+    public static bool CheckAnySameBoundary(List<Dot> dots)
+    {
+        if (dots == null || dots.Count == 0) return false;
+
+        Dot firstDot = dots[0];
+
+        foreach(Dot dot in dots.Skip(1))
+        {
+            if (CheckIfShareSameBoundary(firstDot, dot))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static bool CheckIfShareSameBoundary(Dot dot1, Dot dot2)
+    {
+        bool result = dot1.availableBoundaries.Any(x => dot2.availableBoundaries.Contains(x));
+        return result;
     }
 
     public static List<Dot> GetDotsOfSameBoundary(Boundary searchBound) 
