@@ -66,6 +66,11 @@ public class Boundary
     */
     public void SetType(int type)
     {
+        if ((type < 0) || (type > 2))
+        {
+            Debug.LogError("Cannot set boundaru type to: " +  type);
+            return;
+        }
         boundaryType = type;
     }
 }
