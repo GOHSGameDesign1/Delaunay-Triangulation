@@ -23,6 +23,8 @@ public class SproutsManager : MonoBehaviour
 
     private List<Dot> selectedDots = new List<Dot>();
 
+    private List<string> fullySelectedDotIDs = new List<string>();
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -80,11 +82,24 @@ public class SproutsManager : MonoBehaviour
             Dot selectedDot = dots.Find(x => x.ID == ID);
             if (selectedDot == null) 
             {
-                Debug.LogWarning("Dot with ID: " + ID + " could not be found!");
+                Debug.LogWarning("Dot with ID: " + ID + " could not be found! Skipped over");
+                continue;
+            }
+
+            if (selectedDots.Contains(selectedDot))
+            {
+                Debug.LogWarning("Duplicate of dot " + ID + " found. skipped over");
+                continue;
+            }
+
+            if(selectedDot.numOfLines == 3)
+            {
+                Debug.LogWarning("Dot " + ID + " has too many lines to be selected. Skipped over");
                 continue;
             }
 
             selectedDots.Add(selectedDot);
+            fullySelectedDotIDs.Add(ID);
 
         }
 
@@ -102,7 +117,7 @@ public class SproutsManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("Dots selected");
+        Debug.Log("Dots selected: " + String.Join(" ,", fullySelectedDotIDs));
         PrintGameState();
 
     }
@@ -178,7 +193,53 @@ public class SproutsManager : MonoBehaviour
 
     public void OneBoundaryTypeDecider()
     {
-        
+        Dot firstDot = selectedDots.First();
+
+        if(firstDot.numOfLines <= 1)
+        {
+            if (selectedDots.Count == 1)
+            {
+                Debug.Log("Self-Looping move found with dot " + firstDot.ID + ". No engulf");
+
+
+                /* Check if boundary holds more than 2 dots. 
+                 * Note: We can only pass in the first of the list because a dot with <= 1 lines connected cannot have multiple boundaries/regions.   
+                 */
+                if (SproutsHelper.GetDotsOfSameBoundary(firstDot.availableBoundaries.First()).Count() > 1)
+                {
+                    if (firstDot.availableBoundaries.First().boundaryType != 2) // If not an interior boundary
+                    {
+                        Debug.Log("Self-Looping move found with dot " + firstDot.ID + ". Self engulf");
+                    }
+                }
+
+                return;
+            }
+
+            if (!SproutsHelper.CheckAnySameBoundary(selectedDots))
+            {
+                Debug.Log("Self-Looping move found with dot " + firstDot.ID + ". Engulfing of dots: " + String.Join(", ", fullySelectedDotIDs.Skip(1)));
+                return;
+            }
+
+        }
+
+        if(selectedDots.Count < 2)
+        {
+            Debug.Log("No one boundary moves found");
+            return;
+        }
+
+        Dot secondDot = selectedDots[1];
+
+        if (SproutsHelper.CheckIfShareSameBoundary(firstDot, secondDot))
+        {
+            Debug.Log("Two-Dot one boundary move found. IDK THE REST THO");
+            return;
+        }
+
+        Debug.Log("No one boundary moves found");
+
     }
 
     private void PrintGameState()
